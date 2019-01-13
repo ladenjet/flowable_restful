@@ -36,9 +36,22 @@ public class UserService implements UserDetailsService {
 		if (user == null) {
 			throw new UsernameNotFoundException("Could not find the user '" + username + "'");
 		}
-		String[] roles = new String[] {"ADMIN_ROLE"};
+//		String[] roles = new String[] {"ADMIN_ROLE"};
 		// Not involve authorities, so pass null to authorities
-		return new CustomUserDetails(user, true, true, true, true, Stream.of(roles).map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList()));
+		
+		CustomUserDetails customUserDetails= new CustomUserDetails();
+		customUserDetails.setId(user.getId());
+		customUserDetails.setDeleteFlag(user.getDeleteFlag());
+		customUserDetails.setHrId(user.getHrId());
+		customUserDetails.setManagerId(user.getManagerId());
+		customUserDetails.setName(user.getName());
+		customUserDetails.setPassword(user.getPassword());
+//		customUserDetails.setUserId(user.getId());
+//		customUserDetails.setPassword(user.getPassword());
+//		customUserDetails.setUsername(user.getUsername());
+//		customUserDetails.setRoles(user.getRoles());
+//		
+		return customUserDetails;
 	}
 
 
