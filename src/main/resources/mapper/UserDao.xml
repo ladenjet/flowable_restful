@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genpact.flowable.dao.UserDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.genpact.flowable.entity.User" id="sysUsersMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="password" column="password"/>
+        <result property="managerId" column="manager_id"/>
+        <result property="deleteFlag" column="delete_flag"/>
+        <result property="hrId" column="hr_id"/>
+    </resultMap>
+    
+	<select id="queryObject" resultType="com.genpact.flowable.entity.User">
+		select * from SYS_USERS where id = #{value}
+	</select>
+	<select id="selectUserByUsername" resultType="com.genpact.flowable.entity.User">
+		select * from SYS_USERS where name = #{value}
+	</select>
+	
+	<select id="queryList" resultType="com.genpact.flowable.entity.User">
+		select * from SYS_USERS
+		
+		<where>
+			<if test="keyword != null and keyword != ''">
+				and (
+					`id` like concat('%',#{keyword},'%')
+				)
+			</if>
+		</where>
+		
+		
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from SYS_USERS 
+	</select>
+	 
+	<insert id="save" parameterType="com.genpact.flowable.entity.User" useGeneratedKeys="true" keyProperty="id">
+		insert into SYS_USERS
+		(
+			`name`, 
+			`password`, 
+			`manager_id`, 
+			`delete_flag`, 
+			`hr_id`
+		)
+		values
+		(
+			#{id}, 			
+			#{name}, 			
+			#{password}, 			
+			#{managerId}, 			
+			#{deleteFlag}, 			
+			#{hrId}			
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.genpact.flowable.entity.User">
+		update SYS_USERS 
+		<set>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="password != null">`password` = #{password}, </if>
+			<if test="managerId != null">`manager_id` = #{managerId}, </if>
+			<if test="deleteFlag != null">`delete_flag` = #{deleteFlag}, </if>
+			<if test="hrId != null">`hr_id` = #{hrId}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from SYS_USERS where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from SYS_USERS where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>
