@@ -2,3 +2,7 @@ swagger locations:
 	
 	http://localhost:8088/v2/api-docs 
 	http://localhost:8088/swagger-ui.html#/
+	
+
+security 
+	@PreAuthorize("hasRole('ROLE_VOL') or hasRole('ROLE_ORG')")
