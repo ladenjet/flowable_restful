@@ -12,6 +12,9 @@
         <result property="hrId" column="hr_id"/>
     </resultMap>
     
+    
+  
+    
 	<select id="queryObject" resultType="com.genpact.flowable.entity.User">
 		select * from SYS_USERS where id = #{value}
 	</select>
