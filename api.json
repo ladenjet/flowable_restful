@@ -593,6 +593,50 @@
             }
          }
       },
+      "/flowable/task/withdraw/{hisTaskId}":{  
+         "get":{  
+            "tags":[  
+               "flowable-controller"
+            ],
+            "summary":"withdraw",
+            "operationId":"withdrawUsingGET",
+            "consumes":[  
+               "application/json"
+            ],
+            "produces":[  
+               "*/*"
+            ],
+            "parameters":[  
+               {  
+                  "name":"hisTaskId",
+                  "in":"path",
+                  "description":"hisTaskId",
+                  "required":true,
+                  "type":"string"
+               }
+            ],
+            "responses":{  
+               "200":{  
+                  "description":"OK",
+                  "schema":{  
+                     "type":"object",
+                     "additionalProperties":{  
+                        "type":"object"
+                     }
+                  }
+               },
+               "401":{  
+                  "description":"Unauthorized"
+               },
+               "403":{  
+                  "description":"Forbidden"
+               },
+               "404":{  
+                  "description":"Not Found"
+               }
+            }
+         }
+      },
       "/leavebill/list":{  
          "get":{  
             "tags":[  
