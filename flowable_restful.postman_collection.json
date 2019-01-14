@@ -1,0 +1,835 @@
+{
+	"info": {
+		"_postman_id": "ac1445fb-acdd-446b-9544-eb1efc2df5c8",
+		"name": "flowable_restful copy",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "leavebill",
+			"item": [
+				{
+					"name": "更新请假记录",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "login_user",
+								"value": "4",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\":22,\n    \"reason\": \"reson by json update\",\n    \"remark\": \"remark by json update\",\n    \"leaveDays\": 3\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8088/leavebill/opt",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"leavebill",
+								"opt"
+							]
+						},
+						"description": "update leave bill request"
+					},
+					"response": []
+				},
+				{
+					"name": "获取请假记录",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "login_user",
+								"value": "4",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/leavebill/list",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"leavebill",
+								"list"
+							]
+						},
+						"description": "get leave bill list"
+					},
+					"response": []
+				},
+				{
+					"name": "新增请假记录",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "login_user",
+								"value": "4",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \n    \"reason\": \"reson by json\",\n    \"remark\": \"remark by json\",\n    \"leaveDays\": 2\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8088/leavebill/opt",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"leavebill",
+								"opt"
+							]
+						},
+						"description": "create new leave bill request"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "流程",
+			"item": [
+				{
+					"name": "删除流程",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/process/delete/5d3f9d7e-1539-11e9-88f6-64006a45c85b",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"process",
+								"delete",
+								"5d3f9d7e-1539-11e9-88f6-64006a45c85b"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "流程定义列表",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "6b0f6f0e-e5b2-430d-afea-13fd9f6cc844",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "bearer",
+								"value": "f2b2fd0b-71b8-4e8a-980c-528be16af214",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/process/definition/list",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"process",
+								"definition",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "部署流程",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "6b0f6f0e-e5b2-430d-afea-13fd9f6cc844",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "login_user",
+								"value": "4",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/process/deployment",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"process",
+								"deployment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "部署流程列表",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "f2b2fd0b-71b8-4e8a-980c-528be16af214",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/process/deployment/list",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"process",
+								"deployment",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "开启流程",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "4b053b38-0232-40a5-949a-6a77bce01e2c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"processDefinitionId\":\"leavebill:1:2dee9a66-1541-11e9-af9c-64006a45c85b\",\n\t\"buinessId\":\"21\"\n}"
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/process/start",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"process",
+								"start"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "任务",
+			"item": [
+				{
+					"name": "个人任务",
+					"item": [
+						{
+							"name": "完成个人任务",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"taskId\": \"db8f26a0-1541-11e9-af9c-64006a45c85b\",\n    \"common\": \"同意\",\n    \"variables\": {\n        \"approve\": \"true\"\n    }\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8088/flowable/task/complete/taskAssignee",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"flowable",
+										"task",
+										"complete",
+										"taskAssignee"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "个人任务列表",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8088/flowable/task/list/taskAssignee",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"flowable",
+										"task",
+										"list",
+										"taskAssignee"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "查看个人任务",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8088/flowable/task/view/d330749e-14a8-11e9-9efc-64006a45c85b",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"flowable",
+										"task",
+										"view",
+										"d330749e-14a8-11e9-9efc-64006a45c85b"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "指派任务",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"taskId\":\"ad3fe4c5-1477-11e9-8e51-64006a45c85b\",\n\t\"transferAssignee\":\"2\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8088/flowable/task/transfer",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"flowable",
+										"task",
+										"transfer"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "委派任务",
+					"item": [
+						{
+							"name": "任务委派",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\t\"taskId\":\"4214b123-14b1-11e9-bd08-64006a45c85b\",\n\t\"delegateAssignee\":\"2\"\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8088/flowable/task/delegate",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"flowable",
+										"task",
+										"delegate"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "完成委派任务",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"taskId\": \"4214b123-14b1-11e9-bd08-64006a45c85b\",\n    \"common\": \"同意\",\n    \"variables\": {\n        \"approve\": \"true\"\n    }\n}"
+								},
+								"url": {
+									"raw": "http://localhost:8088/flowable/task/complete/delegateTask",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"flowable",
+										"task",
+										"complete",
+										"delegateTask"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "委派任务列表",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": ""
+								},
+								"url": {
+									"raw": "http://localhost:8088/flowable/task/list/delegateTask",
+									"protocol": "http",
+									"host": [
+										"localhost"
+									],
+									"port": "8088",
+									"path": [
+										"flowable",
+										"task",
+										"list",
+										"delegateTask"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"_postman_isSubFolder": true
+				},
+				{
+					"name": "撤回任务",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/task/withdraw/3741891d-1541-11e9-af9c-64006a45c85b",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"task",
+								"withdraw",
+								"3741891d-1541-11e9-af9c-64006a45c85b"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "批注",
+			"item": [
+				{
+					"name": "查看任务批注",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/common/21",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"common",
+								"21"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "图",
+			"item": [
+				{
+					"name": "看流程图",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "c2238a0b-02c6-400c-8f96-26e2f58965d3",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/flowable/process/diagram/21",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"flowable",
+								"process",
+								"diagram",
+								"21"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "API DOCS",
+			"item": [
+				{
+					"name": "api for json",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "http://localhost:8088/v2/api-docs",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"v2",
+								"api-docs"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API ",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "localhost:8088/swagger-ui.html",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"swagger-ui.html"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "获取token ",
+					"request": {
+						"auth": {
+							"type": "basic",
+							"basic": [
+								{
+									"key": "username",
+									"value": "flowable_client",
+									"type": "string"
+								},
+								{
+									"key": "password",
+									"value": "flowable_secret",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "grant_type",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "cg",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "123",
+									"type": "text"
+								},
+								{
+									"key": "authorization_code",
+									"value": "1",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:8088/oauth/token",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8088",
+							"path": [
+								"oauth",
+								"token"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
