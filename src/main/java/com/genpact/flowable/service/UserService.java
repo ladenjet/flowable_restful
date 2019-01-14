@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -38,10 +39,11 @@ public class UserService implements UserDetailsService {
 		}
 //		String[] roles = new String[] {"ADMIN_ROLE"};
 		// Not involve authorities, so pass null to authorities
-		String[] roles = new String[] { "ADMIN_ROLE" };
+		String[] roles = new String[] { "ROLE_ADMIN" };
 		List<SimpleGrantedAuthority> simpleGrantedAuthorityList = Stream.of(roles).map(role -> new SimpleGrantedAuthority(role)).collect(Collectors.toList());
-		
-		return new org.springframework.security.core.userdetails.User(user.getName(), user.getPassword(), simpleGrantedAuthorityList);
+
+//		return new org.springframework.security.core.userdetails.User(user.getName(), user.getPassword(), simpleGrantedAuthorityList);
+		return new org.springframework.security.core.userdetails.User(user.getId().toString(), user.getPassword(), simpleGrantedAuthorityList);
 	}
 
 

@@ -2,6 +2,7 @@ package com.genpact.flowable.controller;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,8 @@ import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
 import org.flowable.task.api.history.HistoricTaskInstance;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.CollectionUtils;
@@ -84,6 +87,7 @@ public class FlowableController {
 
 	@PostMapping("/process/deployment")
 	@ResponseBody
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result deployment() {
 		repositoryService.createDeployment().addClasspathResource(Constant.PROCESS_DIAGRAM_FOLDER + Constant.PROCESS_KEY + Constant.PROCESS_EXT_BPMN).addClasspathResource(Constant.PROCESS_DIAGRAM_FOLDER + Constant.PROCESS_KEY + Constant.PROCESS_EXT_PNG).name(Constant.PROCESS_NAME).tenantId(Constant.TENANTID).deploy();
 		return Result.ok();
@@ -91,6 +95,7 @@ public class FlowableController {
 
 	@RequestMapping(value = "/process/deployment/list", method = RequestMethod.GET)
 	@ResponseBody
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result listForDeployment() {
 		List<Deployment> list = repositoryService.createDeploymentQuery().orderByDeploymenTime().desc().list();
 		return Result.ok(list.stream().collect(Collectors.toMap(Deployment::getId, Deployment::getName)));
@@ -98,6 +103,7 @@ public class FlowableController {
 
 	@RequestMapping(value = "/process/definition/list", method = RequestMethod.GET)
 	@ResponseBody
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result listForDefinition() {
 		List<ProcessDefinition> list = repositoryService.createProcessDefinitionQuery().processDefinitionTenantId(Constant.TENANTID).orderByProcessDefinitionVersion().desc().list();
 		// repositoryService.createDeploymentQuery().orderByDeploymenTime().desc().count();
@@ -108,6 +114,7 @@ public class FlowableController {
 
 	@RequestMapping(value = "/process/delete/{deploymentId}", method = RequestMethod.GET)
 	@ResponseBody
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result del(@PathVariable("deploymentId") String deploymentId) {
 		repositoryService.deleteDeployment(deploymentId, true);
 		return Result.ok();
@@ -115,9 +122,10 @@ public class FlowableController {
 
 	@PostMapping("/process/start")
 	@ResponseBody
-	public Result start(@RequestBody RequestModel model,HttpServletRequest request) {
+	public Result start(@RequestBody RequestModel model,HttpServletRequest request,Principal  principal) {
 		Map<String, Object> map = new HashMap<>();
-		String userId = request.getHeader(Constant.LOGIN_USER);
+		String userId  = principal.getName();//
+//		String userId = request.getHeader(Constant.LOGIN_USER);
 		identityService.setAuthenticatedUserId(userId);
 		map.put("emp", userId);
 		runtimeService.startProcessInstanceById(model.getProcessDefinitionId(), Constant.PROCESS_KEY + Constant.BSINESSKEY_CHAR + model.getBuinessId(), map);
@@ -129,9 +137,8 @@ public class FlowableController {
 
 	@GetMapping("/task/list/{taskType}")
 	@ResponseBody
-	public Result taskList(HttpServletRequest request,@PathVariable("taskType") String taskType) {
-		String userId = request.getHeader(Constant.LOGIN_USER);
-
+	public Result taskList(HttpServletRequest request,@PathVariable("taskType") String taskType,Principal  principal) {
+		String userId = principal.getName().toString();
 		List<Task> list = new ArrayList<>();
 
 		if(taskType.equalsIgnoreCase("taskAssignee")) {
@@ -154,9 +161,10 @@ public class FlowableController {
 
 	@PostMapping("/task/claim")
 	@ResponseBody
-	public Result claimList(@RequestBody RequestModel model) {
+	public Result claimList(@RequestBody RequestModel model,Principal principal) {
+		String userId = principal.getName().toString();
 		Task task = taskService.createTaskQuery().taskId(model.getTaskId()).singleResult();
-		taskService.claim(task.getId(), model.getUserId());
+		taskService.claim(task.getId(),userId );
 		return Result.ok();
 	}
 
@@ -336,12 +344,12 @@ public class FlowableController {
 
 	@RequestMapping(value = "/task/complete/{taskType}", method = RequestMethod.POST)
 	@ResponseBody
-	public Result complete(HttpServletRequest request, @RequestBody RequestModel model,@PathVariable("taskType") String taskType) {
+	public Result complete(HttpServletRequest request, @RequestBody RequestModel model,@PathVariable("taskType") String taskType,Principal principal) {
 		Task task = taskService.createTaskQuery().taskId(model.getTaskId()).singleResult();
 //		  	由于流程用户上下文对象是线程独立的，所以要在需要的位置设置，要保证设置和获取操作在同一个线程中
 
 		if(StringUtils.isNotEmpty(model.getCommon())) {
-			Authentication.setAuthenticatedUserId(request.getHeader(Constant.LOGIN_USER));// 批注人的名称
+			Authentication.setAuthenticatedUserId(principal.getName());// 批注人的名称
 			taskService.addComment(model.getTaskId(), task.getProcessInstanceId(), model.getCommon());
 		}
 		if(taskType.equalsIgnoreCase("taskAssignee")) {

@@ -1,7 +1,6 @@
 package com.genpact.flowable.entity;
 
 public class Constant {
-	public static final String LOGIN_USER = "login_user";
 //	for flowable
 	public static final String BSINESSKEY_CHAR = "###";
 	public static final String PROCESS_KEY = "leavebill";

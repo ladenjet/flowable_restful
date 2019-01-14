@@ -1,5 +1,7 @@
 package com.genpact.flowable.controller;
 
+import java.security.Principal;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
@@ -26,21 +28,18 @@ public class LeaveBillController {
 
 	@RequestMapping(value="/list",method=RequestMethod.GET)
 	@ResponseBody
-	public Result list(HttpServletRequest request){
-//		SysUser user = (SysUser)request.getSession().getAttribute(Constant.LOGIN_USER);
-		Long userId = Long.parseLong(request.getHeader(Constant.LOGIN_USER));
-		return Result.ok(leaveBillService.findByUserId(userId));
+	public Result list(HttpServletRequest request,Principal principal){
+		return Result.ok(leaveBillService.findByUserId(Long.parseLong(principal.getName())));
 	}
 
 
 
 	@RequestMapping(value="/opt",method=RequestMethod.POST)
 	@ResponseBody
-	public Result opt(@RequestBody LeaveBill leaveBill ,HttpServletRequest request){
-		Long userId = Long.parseLong(request.getHeader(Constant.LOGIN_USER));
+	public Result opt(@RequestBody LeaveBill leaveBill ,HttpServletRequest request,Principal principal){
 		if(leaveBill.getId() == null){
 //			leaveBill.setUser(user);
-			leaveBill.setUserId(userId);
+			leaveBill.setUserId(Long.parseLong(principal.getName()));
 			leaveBill.setState(0);
 			leaveBill.setDeleteFlag(0);
 			 leaveBillService.save(leaveBill);
