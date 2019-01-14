@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genpact.flowable.dao.SysRoleDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.genpact.flowable.entity.SysRole" id="sysRoleMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+    </resultMap>
+    
+    
+    <select id="findRoleByUserId" parameterType="string" resultType="com.genpact.flowable.entity.SysRole">
+	      select r.*
+	        from SYS_USERS u
+	        LEFT JOIN SYS_ROLE_USER sru on u.id= sru.Sys_User_id
+	        LEFT JOIN SYS_ROLE r on sru.sys_role_id=r.id
+	        where u.id=#{userId}
+	 </select>
+
+	<select id="queryObject" resultType="com.genpact.flowable.entity.SysRole">
+		select * from SYS_ROLE where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.genpact.flowable.entity.SysRole">
+		select * from SYS_ROLE
+		
+		<where>
+			<if test="keyword != null and keyword != ''">
+				and (
+					`id` like concat('%',#{keyword},'%')
+				)
+			</if>
+		</where>
+		
+		
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from SYS_ROLE 
+	</select>
+	 
+	<insert id="save" parameterType="com.genpact.flowable.entity.SysRole" useGeneratedKeys="true" keyProperty="id">
+		insert into SYS_ROLE
+		(
+			`name`
+		)
+		values
+		(
+			#{id}, 			
+			#{name}			
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.genpact.flowable.entity.SysRole">
+		update SYS_ROLE 
+		<set>
+			<if test="name != null">`name` = #{name}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from SYS_ROLE where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from SYS_ROLE where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.genpact.flowable.dao.SysPermissionDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="com.genpact.flowable.entity.SysPermission" id="sysPermissionMap">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="url" column="url"/>
+        <result property="pid" column="pid"/>
+    </resultMap>
+    
+    
+      <select id="findPermissionByUserId" parameterType="int" resultType="com.genpact.flowable.entity.SysPermission">
+	      select p.*
+	        from SYS_USERS u
+	        LEFT JOIN SYS_ROLE_USER sru on u.id= sru.Sys_User_id
+	        LEFT JOIN SYS_ROLE r on sru.sys_role_id=r.id
+	        LEFT JOIN SYS_PERMISSION_ROLE spr on spr.role_id=r.id
+	        LEFT JOIN SYS_PERMISSION p on p.id =spr.permission_id
+	        where u.id=#{userId}
+	 </select>
+
+	<select id="queryObject" resultType="com.genpact.flowable.entity.SysPermission">
+		select * from SYS_PERMISSION where id = #{value}
+	</select>
+
+	<select id="queryList" resultType="com.genpact.flowable.entity.SysPermission">
+		select * from SYS_PERMISSION
+		
+		<where>
+			<if test="keyword != null and keyword != ''">
+				and (
+					`id` like concat('%',#{keyword},'%')
+				)
+			</if>
+		</where>
+		
+		
+        <choose>
+            <when test="sidx != null and sidx.trim() != ''">
+                order by ${sidx} ${order}
+            </when>
+			<otherwise>
+                order by id desc
+			</otherwise>
+        </choose>
+		<if test="offset != null and limit != null">
+			limit #{offset}, #{limit}
+		</if>
+	</select>
+	
+ 	<select id="queryTotal" resultType="int">
+		select count(*) from SYS_PERMISSION 
+	</select>
+	 
+	<insert id="save" parameterType="com.genpact.flowable.entity.SysPermission" useGeneratedKeys="true" keyProperty="id">
+		insert into SYS_PERMISSION
+		(
+			`name`, 
+			`description`, 
+			`url`, 
+			`pid`
+		)
+		values
+		(
+			#{id}, 			
+			#{name}, 			
+			#{description}, 			
+			#{url}, 			
+			#{pid}			
+		)
+	</insert>
+	 
+	<update id="update" parameterType="com.genpact.flowable.entity.SysPermission">
+		update SYS_PERMISSION 
+		<set>
+			<if test="name != null">`name` = #{name}, </if>
+			<if test="description != null">`description` = #{description}, </if>
+			<if test="url != null">`url` = #{url}, </if>
+			<if test="pid != null">`pid` = #{pid}</if>
+		</set>
+		where id = #{id}
+	</update>
+	
+	<delete id="delete">
+		delete from SYS_PERMISSION where id = #{value}
+	</delete>
+	
+	<delete id="deleteBatch">
+		delete from SYS_PERMISSION where id in 
+		<foreach item="id" collection="array" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+
+</mapper>
