@@ -87,7 +87,7 @@ public class FlowableController {
 
 	@PostMapping("/process/deployment")
 	@ResponseBody
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	/*@PreAuthorize("hasRole('ROLE_ADMIN')")*/
 	public Result deployment() {
 		repositoryService.createDeployment().addClasspathResource(Constant.PROCESS_DIAGRAM_FOLDER + Constant.PROCESS_KEY + Constant.PROCESS_EXT_BPMN).addClasspathResource(Constant.PROCESS_DIAGRAM_FOLDER + Constant.PROCESS_KEY + Constant.PROCESS_EXT_PNG).name(Constant.PROCESS_NAME).tenantId(Constant.TENANTID).deploy();
 		return Result.ok();
@@ -95,7 +95,7 @@ public class FlowableController {
 
 	@RequestMapping(value = "/process/deployment/list", method = RequestMethod.GET)
 	@ResponseBody
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+	/*@PreAuthorize("hasRole('ROLE_ADMIN')")*/
 	public Result listForDeployment() {
 		List<Deployment> list = repositoryService.createDeploymentQuery().orderByDeploymenTime().desc().list();
 		return Result.ok(list.stream().collect(Collectors.toMap(Deployment::getId, Deployment::getName)));
@@ -103,7 +103,7 @@ public class FlowableController {
 
 	@RequestMapping(value = "/process/definition/list", method = RequestMethod.GET)
 	@ResponseBody
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+//	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result listForDefinition() {
 		List<ProcessDefinition> list = repositoryService.createProcessDefinitionQuery().processDefinitionTenantId(Constant.TENANTID).orderByProcessDefinitionVersion().desc().list();
 		// repositoryService.createDeploymentQuery().orderByDeploymenTime().desc().count();
@@ -114,7 +114,7 @@ public class FlowableController {
 
 	@RequestMapping(value = "/process/delete/{deploymentId}", method = RequestMethod.GET)
 	@ResponseBody
-	@PreAuthorize("hasRole('ROLE_ADMIN')")
+//	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result del(@PathVariable("deploymentId") String deploymentId) {
 		repositoryService.deleteDeployment(deploymentId, true);
 		return Result.ok();

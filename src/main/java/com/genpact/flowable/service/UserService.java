@@ -2,7 +2,6 @@ package com.genpact.flowable.service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import com.genpact.flowable.dao.SysPermissionDao;
 import com.genpact.flowable.dao.SysRoleDao;
 import com.genpact.flowable.dao.UserDao;
 import com.genpact.flowable.entity.SysRole;
@@ -23,6 +23,8 @@ public class UserService implements UserDetailsService {
 	private UserDao userDao;
 	@Autowired
 	private SysRoleDao sysRoleDao;
+	@Autowired
+	private SysPermissionDao sysPermissionDao;
 
 	public String findManagerForEmployee(String userId) {
 		return userDao.queryObject(userId).getManagerId().toString();
@@ -44,7 +46,16 @@ public class UserService implements UserDetailsService {
 //		String[] roles = new String[] { "ROLE_ADMIN" };
 		List<SysRole> roleList = sysRoleDao.findRoleByUserId(user.getId().toString());
 		List<SimpleGrantedAuthority> simpleGrantedAuthorityList = roleList.stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList());
-		return new org.springframework.security.core.userdetails.User(user.getId().toString(), user.getPassword(), simpleGrantedAuthorityList);
+        return new org.springframework.security.core.userdetails.User(user.getName(), user.getPassword(), simpleGrantedAuthorityList);
+
+//		List<SysPermission> permissionList = sysPermissionDao.findPermissionByUserId(user.getId().toString());
+//		List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+//		for (SysPermission sysPermission : permissionList) {
+//			if (sysPermission != null && sysPermission.getName() != null) {
+//                grantedAuthorities.add(sysPermission);
+//            }
+//		}
+//        return new org.springframework.security.core.userdetails.User(user.getId().toString(), user.getPassword(), grantedAuthorities);
 	}
 
 

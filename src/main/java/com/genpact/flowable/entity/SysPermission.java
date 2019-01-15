@@ -2,12 +2,14 @@ package com.genpact.flowable.entity;
 
 import java.io.Serializable;
 
+import org.springframework.security.core.GrantedAuthority;
+
 /**
  * @author sxia
  * @Description: TODO()
  * @date 2019-01-14 14:46:13
  */
-public class SysPermission implements Serializable {
+public class SysPermission implements GrantedAuthority,Serializable {
 
 	/**
 	 *
@@ -23,6 +25,8 @@ public class SysPermission implements Serializable {
 	private String url;
 	//
 	private Long pid;
+//
+	private String method;
 
 	/**
 	 * 设置：
@@ -84,5 +88,17 @@ public class SysPermission implements Serializable {
 	public Long getPid() {
 		return pid;
 	}
+	@Override
+	public String getAuthority() {
+		return name;
+	}
+	public String getMethod() {
+		return method;
+	}
+	public void setMethod(String method) {
+		this.method = method;
+	}
+
+
 
 }

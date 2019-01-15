@@ -6,13 +6,13 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.genpact.flowable.entity.Constant;
 import com.genpact.flowable.entity.LeaveBill;
 import com.genpact.flowable.entity.Result;
 import com.genpact.flowable.entity.User;
@@ -28,6 +28,7 @@ public class LeaveBillController {
 
 	@RequestMapping(value="/list",method=RequestMethod.GET)
 	@ResponseBody
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result list(HttpServletRequest request,Principal principal){
 		return Result.ok(leaveBillService.findByUserId(Long.parseLong(principal.getName())));
 	}

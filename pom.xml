@@ -18,6 +18,8 @@
 		<commons.io.version>2.5</commons.io.version>
 		<springfox.version>2.6.1</springfox.version>
 		<commons-collections4.version>4.1</commons-collections4.version>
+		<commons.configuration.version>1.10</commons.configuration.version>
+		<velocity.version>1.7</velocity.version>
 	</properties>
 
 	<dependencies>
@@ -91,6 +93,20 @@
             <artifactId>commons-collections4</artifactId>
             <version>${commons-collections4.version}</version>
         </dependency>
+        
+        <dependency>
+			<groupId>commons-configuration</groupId>
+			<artifactId>commons-configuration</artifactId>
+			<version>${commons.configuration.version}</version>
+		</dependency>
+
+		<!--velocity -->
+		<dependency>
+			<artifactId>velocity</artifactId>
+			<groupId>org.apache.velocity</groupId>
+			<version>${velocity.version}</version>
+		</dependency>
+        
 
 		<dependency>
 			<groupId>io.springfox</groupId>

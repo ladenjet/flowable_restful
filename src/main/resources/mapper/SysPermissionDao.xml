@@ -8,11 +8,12 @@
         <result property="name" column="name"/>
         <result property="description" column="description"/>
         <result property="url" column="url"/>
+        <result property="method" column="method"/>
         <result property="pid" column="pid"/>
     </resultMap>
     
     
-      <select id="findPermissionByUserId" parameterType="int" resultType="com.genpact.flowable.entity.SysPermission">
+      <select id="findPermissionByUserId" parameterType="string" resultType="com.genpact.flowable.entity.SysPermission">
 	      select p.*
 	        from SYS_USERS u
 	        LEFT JOIN SYS_ROLE_USER sru on u.id= sru.Sys_User_id
@@ -61,6 +62,7 @@
 			`name`, 
 			`description`, 
 			`url`, 
+			`method`,
 			`pid`
 		)
 		values
@@ -69,6 +71,7 @@
 			#{name}, 			
 			#{description}, 			
 			#{url}, 			
+			#{method}, 			
 			#{pid}			
 		)
 	</insert>
@@ -79,6 +82,7 @@
 			<if test="name != null">`name` = #{name}, </if>
 			<if test="description != null">`description` = #{description}, </if>
 			<if test="url != null">`url` = #{url}, </if>
+			<if test="method != null">`method` = #{method}, </if>
 			<if test="pid != null">`pid` = #{pid}</if>
 		</set>
 		where id = #{id}
