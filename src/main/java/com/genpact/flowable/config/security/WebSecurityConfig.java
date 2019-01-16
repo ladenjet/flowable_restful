@@ -10,28 +10,21 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.genpact.flowable.service.UserService;
 
-
 @Configuration
-//用于@PreAuthorize的生效,基于方法的权限控制
+// 用于@PreAuthorize的生效,基于方法的权限控制
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends GlobalAuthenticationConfigurerAdapter {
 	@Autowired
-    private  UserService userService;
+	private UserService userService;
 
-    @Override
-    public void init(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userService).passwordEncoder(encoder());
-    }
-
-    @Bean
-    public BCryptPasswordEncoder encoder(){
-        return new BCryptPasswordEncoder();
-    }
-
-
-    public static void main(String[] args) {
-    	BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-    	System.out.println(bCryptPasswordEncoder.encode("123"));
-    	System.out.println(bCryptPasswordEncoder.matches("123", bCryptPasswordEncoder.encode("123")));
+	@Override
+	public void init(AuthenticationManagerBuilder auth) throws Exception {
+		auth.userDetailsService(userService).passwordEncoder(passwordEncoder());
 	}
+
+	@Bean
+	public BCryptPasswordEncoder passwordEncoder() {
+		return new BCryptPasswordEncoder();
+	}
+
 }
