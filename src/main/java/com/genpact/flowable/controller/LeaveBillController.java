@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.genpact.flowable.entity.Constant;
 import com.genpact.flowable.entity.LeaveBill;
 import com.genpact.flowable.entity.Result;
 import com.genpact.flowable.entity.User;
