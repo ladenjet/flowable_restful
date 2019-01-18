@@ -21,21 +21,17 @@ public class FlowableUtils {
 	
 	
 	public static Deployment deployment(RepositoryService repositoryService,FlowableModel model, MultipartFile file) throws IOException {
-//		repositoryService.createDeployment()
-//						 .addClasspathResource(Constant.PROCESS_DIAGRAM_FOLDER + Constant.PROCESS_KEY + Constant.PROCESS_EXT_BPMN)
-////						 .addClasspathResource(Constant.PROCESS_DIAGRAM_FOLDER + Constant.PROCESS_KEY + Constant.PROCESS_EXT_PNG)
-//						 .name(Constant.PROCESS_NAME)
-//						 .tenantId(Constant.TENANTID)
-//						 .deploy();
+		
+		String processKey = model.getProcessKey();
 		DeploymentBuilder deploymentBuilder = repositoryService.createDeployment();
 		if(file == null) {
 			throw new IOException("File is empty.");
 		}
-		deploymentBuilder.addZipInputStream(new ZipInputStream(file.getInputStream()));
-		
-		if(StringUtils.isNotBlank(model.getProcessKey())) {
-			deploymentBuilder.name(model.getProcessKey());
+		if(StringUtils.isEmpty(processKey)) {
+			throw new IOException("processKey is empty.");
 		}
+		deploymentBuilder.addZipInputStream(new ZipInputStream(file.getInputStream()));
+		deploymentBuilder.name(model.getProcessKey());
 		if(StringUtils.isNotBlank(model.getTenantId())) {
 			deploymentBuilder.tenantId(model.getTenantId());
 		}
