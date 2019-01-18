@@ -1,3 +1,4 @@
+
 package com.genpact.flowable.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +16,11 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 import com.genpact.flowable.service.UserService;
 
 /**
- * 授权服务器配置类
- * 它主要负责授权服务器的配置
- * 包括：信任的客户端信息的管理、请求令牌的 URL 的配置、令牌的管理、如何认证用户的配置、对于请求令牌的 URL 的安全约束的配置
+ * 授权服务器配置类 它主要负责授权服务器的配置 包括：信任的客户端信息的管理、请求令牌的 URL 的配置、令牌的管理、如何认证用户的配置、对于请求令牌的
+ * URL 的安全约束的配置
  */
 @Configuration
+
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
@@ -28,52 +29,31 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 	static final String CLIENT_SECRET = "flowable-secret";
 	static final String GRANT_TYPE_PASSWORD = "password";
 	static final String AUTHORIZATION_CODE = "authorization_code";
-    static final String REFRESH_TOKEN = "refresh_token";
-    static final String IMPLICIT = "implicit";
+	static final String REFRESH_TOKEN = "refresh_token";
+	static final String IMPLICIT = "implicit";
 	static final String SCOPE_READ = "read";
 	static final String SCOPE_WRITE = "write";
-    static final String TRUST = "trust";
-	static final int ACCESS_TOKEN_VALIDITY_SECONDS = 1*60*60;
-    static final int FREFRESH_TOKEN_VALIDITY_SECONDS = 6*60*60;
+	static final String TRUST = "trust";
+	static final int ACCESS_TOKEN_VALIDITY_SECONDS = 1 * 60 * 60;
+	static final int FREFRESH_TOKEN_VALIDITY_SECONDS = 6 * 60 * 60;
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private UserService userService;
+	@Autowired
+	private UserService userService;
 
-    @Override
-    public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
-        clients
-        .inMemory()
-		.withClient(CLIEN_ID)
-		.secret(CLIENT_SECRET)
-		.authorizedGrantTypes(GRANT_TYPE_PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, IMPLICIT )
-		.scopes(SCOPE_READ, SCOPE_WRITE, TRUST)
-		.accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS).
-		refreshTokenValiditySeconds(FREFRESH_TOKEN_VALIDITY_SECONDS);
-    }
-
-    @Override
-    public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
-        endpoints
-                .tokenStore(tokenStore())
-                .accessTokenConverter(accessTokenConverter())
-                .authenticationManager(authenticationManager)
-                .userDetailsService(userService);
-    }
-
-    @Bean
-	public JwtAccessTokenConverter accessTokenConverter() {
-        JwtAccessTokenConverter converter = new JwtAccessTokenConverter();
-        converter.setSigningKey(SIGNING_KEY);
-        return converter;
+	@Override
+	public void configure(ClientDetailsServiceConfigurer clients) throws Exception {
+		clients.inMemory().withClient(CLIEN_ID).secret(CLIENT_SECRET)
+				.authorizedGrantTypes(GRANT_TYPE_PASSWORD, AUTHORIZATION_CODE, REFRESH_TOKEN, IMPLICIT)
+				.scopes(SCOPE_READ, SCOPE_WRITE, TRUST).accessTokenValiditySeconds(ACCESS_TOKEN_VALIDITY_SECONDS)
+				.refreshTokenValiditySeconds(FREFRESH_TOKEN_VALIDITY_SECONDS);
 	}
 
-
-    @Bean
-    public TokenStore tokenStore() {
-        return new JwtTokenStore(accessTokenConverter());
-    }
+	@Override
+	public void configure(AuthorizationServerEndpointsConfigurer endpoints) throws Exception {
+		endpoints.authenticationManager(authenticationManager).userDetailsService(userService);
+	}
 
 }

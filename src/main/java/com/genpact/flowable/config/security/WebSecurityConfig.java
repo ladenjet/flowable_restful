@@ -1,3 +1,4 @@
+
 package com.genpact.flowable.config.security;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +11,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.genpact.flowable.service.UserService;
 
-@Configuration
-// 用于@PreAuthorize的生效,基于方法的权限控制
+@Configuration // 用于@PreAuthorize的生效,基于方法的权限控制
+
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig extends GlobalAuthenticationConfigurerAdapter {
+
 	@Autowired
 	private UserService userService;
 
