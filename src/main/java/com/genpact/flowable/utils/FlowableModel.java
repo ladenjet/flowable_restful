@@ -14,7 +14,7 @@ public class FlowableModel {
 	private String taskId;
 	private String common;
 	private String businessKey;
-	private String tenantId;
+//	private String tenantId;
 	private String userId;
 	/**
 	 *任务转办人
@@ -26,27 +26,6 @@ public class FlowableModel {
 	 */
 	private String delegateAssignee;
 
-	/**
-	 *任务类型 taskAssignee,delegateTask
-	 */
-	private TaskType taskType;
-	
-	
-	public enum TaskType{
-		ENUM_TASK_TYPE_ASSIGNEE(0),
-		ENUM_TASK_TYPE_DELEGATE(1);
-		private int code;
-		private TaskType(int code){
-			this.code = code;
-		}
-		public int getCode() {
-			return code;
-		}
-		public void setCode(int code) {
-			this.code = code;
-		}
-		
-	}
 
 	public String getDeploymentId() {
 		return deploymentId;
@@ -127,24 +106,15 @@ public class FlowableModel {
 	public void setDelegateAssignee(String delegateAssignee) {
 		this.delegateAssignee = delegateAssignee;
 	}
+	
 
-
-
-	public TaskType getTaskType() {
-		return taskType;
-	}
-
-	public void setTaskType(TaskType taskType) {
-		this.taskType = taskType;
-	}
-
-	public String getTenantId() {
-		return tenantId;
-	}
-
-	public void setTenantId(String tenantId) {
-		this.tenantId = tenantId;
-	}
+//	public String getTenantId() {
+//		return tenantId;
+//	}
+//
+//	public void setTenantId(String tenantId) {
+//		this.tenantId = tenantId;
+//	}
 
 	public String getUserId() {
 		return userId;

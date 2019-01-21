@@ -1,10 +1,7 @@
 package com.genpact.flowable.controller;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.security.Principal;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,37 +9,15 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.flowable.bpmn.model.BpmnModel;
-import org.flowable.bpmn.model.ExclusiveGateway;
-import org.flowable.bpmn.model.FlowElement;
-import org.flowable.bpmn.model.FlowNode;
-import org.flowable.bpmn.model.SequenceFlow;
-import org.flowable.bpmn.model.StartEvent;
-import org.flowable.common.engine.impl.identity.Authentication;
-import org.flowable.engine.HistoryService;
-import org.flowable.engine.IdentityService;
 import org.flowable.engine.ProcessEngine;
-import org.flowable.engine.ProcessEngineConfiguration;
-import org.flowable.engine.RepositoryService;
-import org.flowable.engine.RuntimeService;
-import org.flowable.engine.TaskService;
-import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.ProcessDefinition;
-import org.flowable.engine.runtime.Execution;
-import org.flowable.engine.runtime.ProcessInstance;
 import org.flowable.engine.task.Comment;
-import org.flowable.image.ProcessDiagramGenerator;
-import org.flowable.task.api.DelegationState;
 import org.flowable.task.api.Task;
-import org.flowable.task.api.history.HistoricTaskInstance;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,46 +28,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.genpact.flowable.entity.Constant;
 import com.genpact.flowable.entity.Result;
 import com.genpact.flowable.utils.FlowableModel;
-import com.genpact.flowable.utils.FlowableModel.TaskType;
 import com.genpact.flowable.utils.FlowableUtils;
 
 
 @Controller
 @RequestMapping("/flowable")
 public class FlowableController {
-
-	@Autowired
-	private RepositoryService repositoryService;
-
-	@Autowired
-	private RuntimeService runtimeService;
-
-	@Autowired
-	private TaskService taskService;
-
-	@Autowired
-	private HistoryService historyService;
-
-//	@Autowired
-//	private LeaveBillService leaveBillService;
-
-	@Autowired
-	private IdentityService identityService;
-
+	private static Logger LOGGER = LoggerFactory.getLogger(FlowableController.class);
 	@Autowired
 	private ProcessEngine processEngine;
-
-
-
 
 	@PostMapping("/process/deployment")
 	@ResponseBody
 //	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public Result deployment(String processName,String tenantId,@RequestParam("file") MultipartFile file,FlowableModel model) throws IOException {
-		FlowableUtils.deployment(repositoryService, model, file);
+	public Result deployment(@RequestParam("file") MultipartFile file,FlowableModel model) throws IOException {
+		FlowableUtils.deployment(model, processEngine,file);
 		return Result.ok(model);
 	}
 
@@ -100,73 +52,60 @@ public class FlowableController {
 	@ResponseBody
 //	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result listForDeployment() {
-		List<Deployment> list = repositoryService.createDeploymentQuery().orderByDeploymenTime().desc().list();
+		List<Deployment> list = FlowableUtils.getDeployment(processEngine);
 		return Result.ok(Result.ok(list.stream().collect(Collectors.toMap(Deployment::getId, Deployment::getName))));
 	}
+
+	
 
 	@RequestMapping(value = "/process/definition/list", method = RequestMethod.GET)
 	@ResponseBody
 //	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public Result listForDefinition(@RequestBody FlowableModel model) {
-		List<ProcessDefinition> list = FlowableUtils.getProcessDefinition(repositoryService, model);
-		// repositoryService.createDeploymentQuery().orderByDeploymenTime().desc().count();
-		// List<Deployment> list =
-		// repositoryService.createDeploymentQuery().orderByDeploymenTime().desc().list();
+		List<ProcessDefinition> list = FlowableUtils.getProcessDefinition(model,processEngine);
 		return Result.ok(list.stream().collect(Collectors.toMap(ProcessDefinition::getId, ProcessDefinition::getName)));
 	}
 
 	@RequestMapping(value = "/process/delete/{deploymentId}", method = RequestMethod.GET)
 	@ResponseBody
 //	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public Result del(@PathVariable("deploymentId") String deploymentId) {
-		repositoryService.deleteDeployment(deploymentId, true);
+	public Result del(@PathVariable("deploymentId") String deploymentId,FlowableModel model) {
+		model.setDeploymentId(deploymentId);
+		FlowableUtils.deleteDeployment(model,processEngine);
 		return Result.ok();
 	}
+
+
 
 	@PostMapping("/process/start")
 	@ResponseBody
-	public Result start(@RequestBody FlowableModel model,HttpServletRequest request,Principal  principal) {
-		String userId  = principal.getName();//
-//		String userId = request.getHeader(Constant.LOGIN_USER);
-		identityService.setAuthenticatedUserId(userId);
-		runtimeService.startProcessInstanceById(model.getProcessDefinitionId(), Constant.PROCESS_KEY + Constant.BSINESSKEY_CHAR + model.getBusinessKey(), model.getVariables());
-		// runtimeService.startProcessInstanceByKey(Constant.PROCESS_KEY, map);
-//		ProcessInstance = runtimeService.startProcessInstanceById(model.getProcessDefinitionId(),  model.getVariables());
+	public Result start(@RequestBody FlowableModel model,Principal  principal) {
+		model.setUserId(principal.getName());
+		FlowableUtils.start(model, processEngine);
 		return Result.ok();
 	}
 
-	@GetMapping("/task/list/{taskType}")
+	@GetMapping("/task/list")
 	@ResponseBody
-	public Result taskList(HttpServletRequest request,@PathVariable("taskType") TaskType taskType,Principal  principal) {
-		String userId = principal.getName().toString();
-		List<Task> list = new ArrayList<>();
-
-		if(taskType == TaskType.ENUM_TASK_TYPE_ASSIGNEE) {
-			 list = taskService.createTaskQuery().taskAssignee(userId).orderByTaskCreateTime().desc().list();
-		}else if(taskType == TaskType.ENUM_TASK_TYPE_DELEGATE) {
-			list = taskService
-            .createTaskQuery()
-            .taskDelegationState(DelegationState.PENDING)
-//            	任务委派给谁
-            .taskAssignee(userId)
-//            	任务原有人
-//            .taskOwner(arg0)
-            .list();
-		}
-
+	public Result taskList(FlowableModel model,Principal  principal) {
+		model.setUserId(principal.getName());
+		List<Task> list = FlowableUtils.getTask(model,processEngine);
 		return Result.ok(list.stream().collect(Collectors.toMap(Task::getId, Task::getName)));
 	}
+
+	
 
 
 
 	@PostMapping("/task/claim")
 	@ResponseBody
 	public Result claimList(@RequestBody FlowableModel model,Principal principal) {
-		String userId = principal.getName().toString();
-		Task task = taskService.createTaskQuery().taskId(model.getTaskId()).singleResult();
-		taskService.claim(task.getId(),userId );
+		model.setUserId(principal.getName());
+		FlowableUtils.taskClaim(model, processEngine);
 		return Result.ok();
 	}
+
+	
 
 
 	/**
@@ -181,8 +120,8 @@ public class FlowableController {
 	 */
 	@PostMapping("/task/transfer")
 	@ResponseBody
-	public Result claim(@RequestBody FlowableModel model) {
-		taskService.setAssignee(model.getTaskId(), model.getTransferAssignee());
+	public Result transfer(@RequestBody FlowableModel model) {
+		processEngine.getTaskService().setAssignee(model.getTaskId(), model.getTransferAssignee());
 		return Result.ok();
 	}
 
@@ -199,22 +138,17 @@ public class FlowableController {
 	@PostMapping("/task/delegate")
 	@ResponseBody
 	public Result delegate(@RequestBody FlowableModel model) {
-		taskService.delegateTask(model.getTaskId(), model.getDelegateAssignee());
+		FlowableUtils.taskDelegate(model, processEngine);
 		return Result.ok();
 	}
 
+
+
 	@RequestMapping(value = "task/view/{taskId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Result/* ResponseEntity */ view(@PathVariable("taskId") String taskId, Model model) {
-		Map<String,String> outSequenceFlowMap = new HashMap<>();
-		Task task = taskService.createTaskQuery().taskId(taskId).singleResult();
-		Execution exec = runtimeService.createExecutionQuery().executionId(task.getExecutionId()).singleResult();
-        String currentActivityId = exec.getActivityId();
-        System.out.println("currentActivityId: " + currentActivityId);
-//		获取当前节点的 flowNode对象
-        BpmnModel bpmnModel = repositoryService.getBpmnModel(task.getProcessDefinitionId());
-        getOutSequenceFlow(currentActivityId,bpmnModel,outSequenceFlowMap);
-
+	public Result/* ResponseEntity */ view(@PathVariable("taskId") String taskId,FlowableModel model) {
+		model.setTaskId(taskId);
+		Map<String, String> outSequenceFlowMap = FlowableUtils.getOutSequenceFlow(model,processEngine);
         return Result.ok(outSequenceFlowMap);
 
 	}
@@ -222,203 +156,35 @@ public class FlowableController {
 
 	@RequestMapping(value = "task/withdraw/{hisTaskId}", method = RequestMethod.GET)
 	@ResponseBody
-	public Result/* ResponseEntity */ withdraw(@PathVariable("hisTaskId") String hisTaskId, Model model) {
-		List<String> currentActivityIdList = new ArrayList<>();
-		List<FlowElement> preFlowElementList = new ArrayList<>();
-		HistoricTaskInstance historicTaskInstance = historyService.createHistoricTaskInstanceQuery().taskId(hisTaskId).singleResult();
-		BpmnModel bpmnModel = repositoryService.getBpmnModel(historicTaskInstance.getProcessDefinitionId());
-		List<Execution> execList = runtimeService.createExecutionQuery().executionId(historicTaskInstance.getExecutionId()).list();
-		if(!CollectionUtils.isEmpty(execList)){
-			for (Execution execution : execList) {
-				String currentActivityId = execution.getActivityId();
-				currentActivityIdList.add(currentActivityId);
-				getInSequenceFlow(currentActivityId,bpmnModel,preFlowElementList);
-			}
-		}
-
-//				撤回操作
-		if(currentActivityIdList.size() == 1) {
-			if(preFlowElementList.size() == 1) {
-				FlowElement preFlowElement = preFlowElementList.get(0);
-
-//				开始节点不能回退
-				if(preFlowElement instanceof StartEvent){
-					throw new RuntimeException("Can not withdraw to the start event.");
-				}
-				runtimeService.createChangeActivityStateBuilder()
-				.processInstanceId(	historicTaskInstance.getProcessInstanceId())
-				.moveActivityIdTo(currentActivityIdList.get(0), preFlowElement.getId())
-				.changeState();
-			}else {
-				if(preFlowElementList.stream().anyMatch(e-> (e instanceof StartEvent))) {
-					throw new RuntimeException("Can not withdraw to the start event.");
-				}
-				runtimeService.createChangeActivityStateBuilder()
-				.processInstanceId(	historicTaskInstance.getProcessInstanceId())
-				.moveSingleActivityIdToActivityIds(currentActivityIdList.get(0), preFlowElementList.stream().map(e->e.getId()).collect(Collectors.toList()))
-				.changeState();
-			}
-		}else {
-			if(preFlowElementList.size() == 1) {
-				FlowElement preFlowElement = preFlowElementList.get(0);
-
-//				开始节点不能回退
-				if(preFlowElement instanceof StartEvent){
-					throw new RuntimeException("Can not withdraw to the start event.");
-				}
-				runtimeService.createChangeActivityStateBuilder()
-				.processInstanceId(	historicTaskInstance.getProcessInstanceId())
-				.moveActivityIdsToSingleActivityId(currentActivityIdList, preFlowElement.getId())
-				.changeState();
-			}else {
-				if(preFlowElementList.stream().anyMatch(e-> (e instanceof StartEvent))) {
-					throw new RuntimeException("Can not withdraw to the start event.");
-				}
-				//not support
-			}
-		}
-
+	public Result withdraw(@PathVariable("hisTaskId") String hisTaskId, FlowableModel model) {
+		model.setTaskId(hisTaskId);
+		FlowableUtils.taskWithdraw(processEngine, model);
         return Result.ok();
 	}
 
-	/**
-	 *
-	 * 方法名:getOutSequenceFlow
-	 * 描    述:获得当前节点出去的线
-	 * 返回值:void
-	 * 参    数:@param activityId
-	 * 参    数:@param bpmnModel
-	 * 参    数:@param outSequenceFlowMap
-	 * 作    者:710009498
-	 * 时    间:Jan 11, 2019 8:44:21 AM
-	 */
-	public void getOutSequenceFlow(String activityId,BpmnModel bpmnModel,Map<String,String> outSequenceFlowMap){
-		FlowNode flowNode = (FlowNode) bpmnModel.getFlowElement(activityId);
-        List<SequenceFlow> outFlows = flowNode.getOutgoingFlows();
-		for (SequenceFlow outFlow : outFlows) {
-			 FlowElement nextFlowElement = outFlow.getTargetFlowElement();
-			 if(nextFlowElement instanceof ExclusiveGateway) { // 排他网关处理
-				 getOutSequenceFlow(nextFlowElement.getId(),bpmnModel,outSequenceFlowMap);
-			} else {
-				if (outFlow != null && StringUtils.isNotEmpty(outFlow.getName())) {
-					if(!outSequenceFlowMap.containsKey(outFlow.getName())) {
-						outSequenceFlowMap.put(outFlow.getName(),outFlow.getConditionExpression());
-					}else {
-						throw new RuntimeException("Duplicated SequenceFlow name " + outFlow.getName() );
-					}
-				} else {
-					outSequenceFlowMap.put("同意","${approve == 'true'");
-				}
-			}
-		}
-	}
-
-	/**
-	 *
-	 * 方法名:getOutSequenceFlow
-	 * 描    述:获得当前活动节点的上一个（多个） 节点
-	 * 返回值:void
-	 * 参    数:@param activityId
-	 * 参    数:@param bpmnModel
-	 * 参    数:@param outSequenceFlowMap
-	 * 作    者:710009498
-	 * 时    间:Jan 11, 2019 8:42:58 AM
-	 */
-	public void getInSequenceFlow(String activityId,BpmnModel bpmnModel,List<FlowElement> flowElementList){
-		FlowNode flowNode = (FlowNode) bpmnModel.getFlowElement(activityId);
-        List<SequenceFlow> incomingFlows = flowNode.getIncomingFlows();
-		for (SequenceFlow incomeFlow : incomingFlows) {
-			 FlowElement preFlowElement = incomeFlow.getSourceFlowElement();
-			 if(preFlowElement instanceof ExclusiveGateway) { // 排他网关处理
-				 getInSequenceFlow(preFlowElement.getId(),bpmnModel,flowElementList);
-			} /*else if(preFlowElement instanceof StartEvent){
-
-			}*/else{
-				if (preFlowElement != null && StringUtils.isNotEmpty(preFlowElement.getId())) {
-					flowElementList.add(preFlowElement);
-				}
-			}
-		}
-	}
+	
 
 
-	@RequestMapping(value = "/task/complete/{taskType}", method = RequestMethod.POST)
+	@RequestMapping(value = "/task/complete", method = RequestMethod.POST)
 	@ResponseBody
-	public Result complete(HttpServletRequest request, @RequestBody FlowableModel model,@PathVariable("taskType") String taskType,Principal principal) {
-		Task task = taskService.createTaskQuery().taskId(model.getTaskId()).singleResult();
-//		  	由于流程用户上下文对象是线程独立的，所以要在需要的位置设置，要保证设置和获取操作在同一个线程中
-
-		if(StringUtils.isNotEmpty(model.getCommon())) {
-			Authentication.setAuthenticatedUserId(principal.getName());// 批注人的名称
-			taskService.addComment(model.getTaskId(), task.getProcessInstanceId(), model.getCommon());
-		}
-		if(taskType.equalsIgnoreCase("taskAssignee")) {
-//			// set choose line
-//			Map<String, Object> map = new HashMap<>();
-//			if(StringUtils.isNotEmpty(model.getButton())) {
-//				map.put("approve", model.getButton());
-//			}
-			taskService.complete(model.getTaskId(), model.getVariables());
-		}else if(taskType.equalsIgnoreCase("delegateTask")) {
-			taskService.resolveTask(model.getTaskId(), model.getVariables());
-			taskService.complete(model.getTaskId(), model.getVariables());
-		}
+	public Result complete(HttpServletRequest request, @RequestBody FlowableModel model,Principal principal) {
+		model.setUserId(principal.getName());
+		FlowableUtils.next(model, processEngine);
 		return Result.ok();
+		
 	}
 
-	@RequestMapping(value = "/common/{buinessId}", method = RequestMethod.GET)
+	@RequestMapping(value = "/common", method = RequestMethod.GET)
 	@ResponseBody
-	public Result common(@PathVariable("buinessId") String buinessId) {
-		List<Comment> commonList = new ArrayList<>();
-		if(StringUtils.isNotEmpty(buinessId)) {
-			List<HistoricTaskInstance> hisTaskList = historyService.createHistoricTaskInstanceQuery().processInstanceBusinessKey(Constant.PROCESS_KEY + Constant.BSINESSKEY_CHAR + buinessId).list();
-			for (HistoricTaskInstance historicTaskInstance : hisTaskList) {
-				commonList.addAll(taskService.getTaskComments(historicTaskInstance.getId()));
-			}
-		}
+	public Result common( @RequestBody FlowableModel model) {
+		List<Comment> commonList = FlowableUtils.getCommon(model, processEngine);
 		return Result.ok(commonList);
 	}
 
-	@RequestMapping(value = "/process/diagram/{buinessId}", method = RequestMethod.GET)
-	public void findProcessPic(@PathVariable("buinessId") String buinessId, HttpServletResponse response) throws IOException {
-//		得到正在执行的Activity的Id
-		List<String> activityIds = new ArrayList<>();
-//		线
-		List<String> flows = new ArrayList<>();
-
-		ProcessInstance processInstance = runtimeService.createProcessInstanceQuery().processInstanceBusinessKey(Constant.PROCESS_KEY + Constant.BSINESSKEY_CHAR + buinessId).singleResult();
-		String processDefinitionId = null;
-		if(processInstance == null) {
-			HistoricProcessInstance hisProcessInstance = historyService.createHistoricProcessInstanceQuery().processInstanceBusinessKey(Constant.PROCESS_KEY + Constant.BSINESSKEY_CHAR + buinessId).singleResult();
-			if(hisProcessInstance == null) {
-				throw new RuntimeException("Process not start.");
-			}
-			processDefinitionId = hisProcessInstance.getProcessDefinitionId();
-		}else {
-			processDefinitionId = processInstance.getProcessDefinitionId();
-			List<Execution> executionList = runtimeService.createExecutionQuery().processDefinitionId(processDefinitionId).list();
-//			得到正在执行的Activity的Id
-			for (Execution execution : executionList) {
-				List<String> ids = runtimeService.getActiveActivityIds(execution.getId());
-				activityIds.addAll(ids);
-			}
-		}
-		BpmnModel bpmnModel = repositoryService.getBpmnModel(processDefinitionId);
-		ProcessEngineConfiguration engconf = processEngine.getProcessEngineConfiguration();
-		ProcessDiagramGenerator diagramGenerator = engconf.getProcessDiagramGenerator();
-		InputStream inputStream = null;
-		try {
-			inputStream = diagramGenerator.generateDiagram(bpmnModel, "PNG", activityIds, flows, "宋体","宋体","宋体", engconf.getClassLoader(), 1.0, true);
-		//	InputStream input = diagramGenerator.generateDiagram(bpmnModel, "PNG", activityIds, flows, engconf.getActivityFontName(), engconf.getLabelFontName(), engconf.getAnnotationFontName(), engconf.getClassLoader(), 1.0, false);
-			IOUtils.copy(inputStream, response.getOutputStream());
-		} finally {
-			if(inputStream != null) {
-				inputStream.close();
-			}
-		}
+	@RequestMapping(value = "/process/diagram", method = RequestMethod.POST)
+	public void findProcessPic(@RequestBody FlowableModel model ,HttpServletResponse response) throws IOException {
+		FlowableUtils.getDiagram(model,processEngine, response);
 
 	}
-
-
 
 }

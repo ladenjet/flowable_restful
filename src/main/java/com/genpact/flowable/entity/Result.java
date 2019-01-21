@@ -27,13 +27,6 @@ public class Result extends HashMap<String, Object> {
 		return error(HttpStatus.INTERNAL_SERVER_ERROR, msg);
 	}
 
-//	public static Result error(int code, String msg) {
-//		Result r = new Result();
-//		r.put("code", code);
-//		r.put("msg", msg);
-//		return r;
-//	}
-
 	public static Result error(HttpStatus status, String msg) {
 		Result r = new Result();
 		r.put("code", status.value());
