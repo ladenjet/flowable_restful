@@ -19,7 +19,7 @@
       }
    ],
    "paths":{  
-      "/flowable/common/{buinessId}":{  
+      "/flowable/common":{  
          "get":{  
             "tags":[  
                "flowable-controller"
@@ -34,11 +34,13 @@
             ],
             "parameters":[  
                {  
-                  "name":"buinessId",
-                  "in":"path",
-                  "description":"buinessId",
+                  "in":"body",
+                  "name":"model",
+                  "description":"model",
                   "required":true,
-                  "type":"string"
+                  "schema":{  
+                     "$ref":"#/definitions/FlowableModel"
+                  }
                }
             ],
             "responses":{  
@@ -75,6 +77,17 @@
             ],
             "produces":[  
                "*/*"
+            ],
+            "parameters":[  
+               {  
+                  "in":"body",
+                  "name":"model",
+                  "description":"model",
+                  "required":true,
+                  "schema":{  
+                     "$ref":"#/definitions/FlowableModel"
+                  }
+               }
             ],
             "responses":{  
                "200":{  
@@ -118,6 +131,72 @@
                   "description":"deploymentId",
                   "required":true,
                   "type":"string"
+               },
+               {  
+                  "name":"deploymentId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processInstanceId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processDefinitionId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"variables",
+                  "in":"query",
+                  "required":false,
+                  "type":"object"
+               },
+               {  
+                  "name":"taskId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"common",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"businessKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"userId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"transferAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"delegateAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
                }
             ],
             "responses":{  
@@ -150,10 +229,85 @@
             "summary":"deployment",
             "operationId":"deploymentUsingPOST",
             "consumes":[  
-               "application/json"
+               "multipart/form-data"
             ],
             "produces":[  
                "*/*"
+            ],
+            "parameters":[  
+               {  
+                  "name":"file",
+                  "in":"formData",
+                  "description":"file",
+                  "required":true,
+                  "type":"file"
+               },
+               {  
+                  "name":"deploymentId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processInstanceId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processDefinitionId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"variables",
+                  "in":"query",
+                  "required":false,
+                  "type":"object"
+               },
+               {  
+                  "name":"taskId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"common",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"businessKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"userId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"transferAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"delegateAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               }
             ],
             "responses":{  
                "200":{  
@@ -215,13 +369,13 @@
             }
          }
       },
-      "/flowable/process/diagram/{buinessId}":{  
-         "get":{  
+      "/flowable/process/diagram":{  
+         "post":{  
             "tags":[  
                "flowable-controller"
             ],
             "summary":"findProcessPic",
-            "operationId":"findProcessPicUsingGET",
+            "operationId":"findProcessPicUsingPOST",
             "consumes":[  
                "application/json"
             ],
@@ -230,16 +384,21 @@
             ],
             "parameters":[  
                {  
-                  "name":"buinessId",
-                  "in":"path",
-                  "description":"buinessId",
+                  "in":"body",
+                  "name":"model",
+                  "description":"model",
                   "required":true,
-                  "type":"string"
+                  "schema":{  
+                     "$ref":"#/definitions/FlowableModel"
+                  }
                }
             ],
             "responses":{  
                "200":{  
                   "description":"OK"
+               },
+               "201":{  
+                  "description":"Created"
                },
                "401":{  
                   "description":"Unauthorized"
@@ -273,7 +432,7 @@
                   "description":"model",
                   "required":true,
                   "schema":{  
-                     "$ref":"#/definitions/RequestModel"
+                     "$ref":"#/definitions/FlowableModel"
                   }
                }
             ],
@@ -322,7 +481,7 @@
                   "description":"model",
                   "required":true,
                   "schema":{  
-                     "$ref":"#/definitions/RequestModel"
+                     "$ref":"#/definitions/FlowableModel"
                   }
                }
             ],
@@ -351,7 +510,7 @@
             }
          }
       },
-      "/flowable/task/complete/{taskType}":{  
+      "/flowable/task/complete":{  
          "post":{  
             "tags":[  
                "flowable-controller"
@@ -371,15 +530,8 @@
                   "description":"model",
                   "required":true,
                   "schema":{  
-                     "$ref":"#/definitions/RequestModel"
+                     "$ref":"#/definitions/FlowableModel"
                   }
-               },
-               {  
-                  "name":"taskType",
-                  "in":"path",
-                  "description":"taskType",
-                  "required":true,
-                  "type":"string"
                }
             ],
             "responses":{  
@@ -427,7 +579,7 @@
                   "description":"model",
                   "required":true,
                   "schema":{  
-                     "$ref":"#/definitions/RequestModel"
+                     "$ref":"#/definitions/FlowableModel"
                   }
                }
             ],
@@ -456,7 +608,7 @@
             }
          }
       },
-      "/flowable/task/list/{taskType}":{  
+      "/flowable/task/list":{  
          "get":{  
             "tags":[  
                "flowable-controller"
@@ -471,10 +623,69 @@
             ],
             "parameters":[  
                {  
-                  "name":"taskType",
-                  "in":"path",
-                  "description":"taskType",
-                  "required":true,
+                  "name":"deploymentId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processInstanceId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processDefinitionId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"variables",
+                  "in":"query",
+                  "required":false,
+                  "type":"object"
+               },
+               {  
+                  "name":"taskId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"common",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"businessKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"userId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"transferAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"delegateAssignee",
+                  "in":"query",
+                  "required":false,
                   "type":"string"
                }
             ],
@@ -505,8 +716,8 @@
             "tags":[  
                "flowable-controller"
             ],
-            "summary":"claim",
-            "operationId":"claimUsingPOST",
+            "summary":"transfer",
+            "operationId":"transferUsingPOST",
             "consumes":[  
                "application/json"
             ],
@@ -520,7 +731,7 @@
                   "description":"model",
                   "required":true,
                   "schema":{  
-                     "$ref":"#/definitions/RequestModel"
+                     "$ref":"#/definitions/FlowableModel"
                   }
                }
             ],
@@ -569,6 +780,72 @@
                   "description":"taskId",
                   "required":true,
                   "type":"string"
+               },
+               {  
+                  "name":"deploymentId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processInstanceId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processDefinitionId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"variables",
+                  "in":"query",
+                  "required":false,
+                  "type":"object"
+               },
+               {  
+                  "name":"taskId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"common",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"businessKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"userId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"transferAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"delegateAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
                }
             ],
             "responses":{  
@@ -612,6 +889,72 @@
                   "in":"path",
                   "description":"hisTaskId",
                   "required":true,
+                  "type":"string"
+               },
+               {  
+                  "name":"deploymentId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processInstanceId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processDefinitionId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"processKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"variables",
+                  "in":"query",
+                  "required":false,
+                  "type":"object"
+               },
+               {  
+                  "name":"taskId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"common",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"businessKey",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"userId",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"transferAssignee",
+                  "in":"query",
+                  "required":false,
+                  "type":"string"
+               },
+               {  
+                  "name":"delegateAssignee",
+                  "in":"query",
+                  "required":false,
                   "type":"string"
                }
             ],
@@ -757,44 +1100,6 @@
             }
          }
       },
-      "RequestModel":{  
-         "type":"object",
-         "properties":{  
-            "buinessId":{  
-               "type":"string"
-            },
-            "button":{  
-               "type":"string"
-            },
-            "common":{  
-               "type":"string"
-            },
-            "delegateAssignee":{  
-               "type":"string"
-            },
-            "deploymentId":{  
-               "type":"string"
-            },
-            "processDefinitionId":{  
-               "type":"string"
-            },
-            "taskId":{  
-               "type":"string"
-            },
-            "taskType":{  
-               "type":"string"
-            },
-            "transferAssignee":{  
-               "type":"string"
-            },
-            "userId":{  
-               "type":"string"
-            },
-            "variables":{  
-               "type":"object"
-            }
-         }
-      },
       "User":{  
          "type":"object",
          "properties":{  
@@ -819,6 +1124,44 @@
             },
             "password":{  
                "type":"string"
+            }
+         }
+      },
+      "FlowableModel":{  
+         "type":"object",
+         "properties":{  
+            "businessKey":{  
+               "type":"string"
+            },
+            "common":{  
+               "type":"string"
+            },
+            "delegateAssignee":{  
+               "type":"string"
+            },
+            "deploymentId":{  
+               "type":"string"
+            },
+            "processDefinitionId":{  
+               "type":"string"
+            },
+            "processInstanceId":{  
+               "type":"string"
+            },
+            "processKey":{  
+               "type":"string"
+            },
+            "taskId":{  
+               "type":"string"
+            },
+            "transferAssignee":{  
+               "type":"string"
+            },
+            "userId":{  
+               "type":"string"
+            },
+            "variables":{  
+               "type":"object"
             }
          }
       }
