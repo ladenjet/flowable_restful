@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import java.util.zip.ZipInputStream;
 
 import javax.servlet.http.HttpServletResponse;
@@ -18,10 +17,11 @@ import org.flowable.bpmn.model.ExclusiveGateway;
 import org.flowable.bpmn.model.FlowElement;
 import org.flowable.bpmn.model.FlowNode;
 import org.flowable.bpmn.model.SequenceFlow;
-import org.flowable.bpmn.model.StartEvent;
+import org.flowable.bpmn.model.UserTask;
 import org.flowable.common.engine.impl.identity.Authentication;
 import org.flowable.engine.ProcessEngine;
 import org.flowable.engine.ProcessEngineConfiguration;
+import org.flowable.engine.history.HistoricActivityInstance;
 import org.flowable.engine.history.HistoricProcessInstance;
 import org.flowable.engine.repository.Deployment;
 import org.flowable.engine.repository.DeploymentBuilder;
@@ -43,17 +43,21 @@ import com.genpact.flowable.exception.FlowableException;
 public class FlowableUtils {
 	
 	
-	public static Deployment deployment(FlowableModel model, ProcessEngine processEngine,MultipartFile file) throws IOException {
+	public static Deployment deployment(FlowableModel model, ProcessEngine processEngine,MultipartFile file)  {
 		
 		String processKey = model.getProcessKey();
 		if(StringUtils.isEmpty(processKey)) {
-			throw new IOException("processKey is empty.");
+			throw new FlowableException("processKey is empty.");
 		}
 		if(file == null) {
-			throw new IOException("File is empty.");
+			throw new FlowableException("file is empty.");
 		}
 		DeploymentBuilder deploymentBuilder = processEngine.getRepositoryService().createDeployment();
-		deploymentBuilder.addZipInputStream(new ZipInputStream(file.getInputStream()));
+		try {
+			deploymentBuilder.addZipInputStream(new ZipInputStream(file.getInputStream()));
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		deploymentBuilder.name(model.getProcessKey());
 //		if(StringUtils.isNotBlank(model.getTenantId())) {
 //			deploymentBuilder.tenantId(model.getTenantId());
@@ -67,7 +71,32 @@ public class FlowableUtils {
 		
 		return deployment;
 	}
+
 	
+	public static Deployment deployment(FlowableModel model, ProcessEngine processEngine,String resourceFile)  {
+		
+		String processKey = model.getProcessKey();
+		if(StringUtils.isEmpty(processKey)) {
+			throw new FlowableException("processKey is empty.");
+		}
+		if(StringUtils.isEmpty(resourceFile)) {
+			throw new FlowableException("resourceFile is empty.");
+		}
+		DeploymentBuilder deploymentBuilder = processEngine.getRepositoryService().createDeployment();
+		deploymentBuilder.addClasspathResource(resourceFile);
+		deploymentBuilder.name(model.getProcessKey());
+//		if(StringUtils.isNotBlank(model.getTenantId())) {
+//			deploymentBuilder.tenantId(model.getTenantId());
+//		}
+		Deployment deployment = deploymentBuilder.deploy();
+		model.setDeploymentId(deployment.getId());
+		
+		
+		ProcessDefinition processDefinition = processEngine.getRepositoryService().createProcessDefinitionQuery().deploymentId(model.getDeploymentId()).singleResult();
+		model.setProcessDefinitionId(processDefinition.getId());
+		
+		return deployment;
+	}
 	
 	public static List<Deployment> getDeployment(ProcessEngine processEngine) {
 		return processEngine.getRepositoryService().createDeploymentQuery().orderByDeploymenTime().desc().list();
@@ -101,7 +130,12 @@ public class FlowableUtils {
 	}
 	
 	
-	
+	/**
+	 * 
+	 * @param model.userId, model.processKey,model.businessKey can not empty
+	 * @param processEngine
+	 * @return
+	 */
 	public static ProcessInstance start( FlowableModel model,ProcessEngine processEngine) {
 		String userId=  model.getUserId();
 		String processKey = model.getProcessKey();
@@ -189,7 +223,7 @@ public class FlowableUtils {
 			processEngine.getTaskService().addComment(taskId, task.getProcessInstanceId(), model.getCommon());
 		}
 		
-		//委托任务需要两步
+//		委托任务需要两步
 		if(DelegationState.PENDING == task.getDelegationState()  ) {
 			processEngine.getTaskService().resolveTask(taskId, model.getVariables());
 		}
@@ -280,65 +314,55 @@ public class FlowableUtils {
 	    return outSequenceFlowMap;
 	}
 	
-	public static boolean taskWithdraw(ProcessEngine processEngine,FlowableModel model) {
+	public static boolean taskWithdraw(FlowableModel model ,ProcessEngine processEngine) {
 		String taskId = model.getTaskId();
 		if (StringUtils.isEmpty(taskId)) {
 			throw new FlowableException("taskId is empty.");
 		}
-		List<String> currentActivityIdList = new ArrayList<>();
-		List<FlowElement> preFlowElementList = new ArrayList<>();
+//			要退回到的历史节点
+		String historicActivityId = StringUtils.EMPTY;
 		HistoricTaskInstance historicTaskInstance = processEngine.getHistoryService().createHistoricTaskInstanceQuery().taskId(taskId).singleResult();
+		List<HistoricActivityInstance> historicActivityInstanceList = processEngine.getHistoryService().createHistoricActivityInstanceQuery().processInstanceId(historicTaskInstance.getProcessInstanceId()).list();
+		for (HistoricActivityInstance historicActivityInstance : historicActivityInstanceList) {
+			if("userTask".equals(historicActivityInstance.getActivityType()) && taskId.equals(historicActivityInstance.getTaskId())) {
+				historicActivityId = historicActivityInstance.getActivityId();
+			}
+			
+		}
+		
+		List<String> currentActivityIdList = new ArrayList<>();
+		
 		BpmnModel bpmnModel = processEngine.getRepositoryService().getBpmnModel(historicTaskInstance.getProcessDefinitionId());
-		List<Execution> execList = processEngine.getRuntimeService().createExecutionQuery().executionId(historicTaskInstance.getExecutionId()).list();
+		List<Execution> execList = processEngine.getRuntimeService().createExecutionQuery().processInstanceId(historicTaskInstance.getProcessInstanceId()).list();
+		
 		if(!CollectionUtils.isEmpty(execList)){
 			for (Execution execution : execList) {
 				String currentActivityId = execution.getActivityId();
-				currentActivityIdList.add(currentActivityId);
-				getInSequenceFlow(currentActivityId,bpmnModel,preFlowElementList);
+				if(StringUtils.isNotBlank(currentActivityId)) {
+					FlowNode flowNode = (FlowNode) bpmnModel.getFlowElement(currentActivityId);
+					if(flowNode instanceof UserTask) {
+						currentActivityIdList.add(currentActivityId);
+					}
+				}
 			}
 		}
 
 //				撤回操作
-		if(currentActivityIdList.size() == 1) {
-			if(preFlowElementList.size() == 1) {
-				FlowElement preFlowElement = preFlowElementList.get(0);
-
-//				开始节点不能回退
-				if(preFlowElement instanceof StartEvent){
-					throw new FlowableException("Can not withdraw to the start event.");
-				}
-				processEngine.getRuntimeService().createChangeActivityStateBuilder()
-				.processInstanceId(	historicTaskInstance.getProcessInstanceId())
-				.moveActivityIdTo(currentActivityIdList.get(0), preFlowElement.getId())
-				.changeState();
-			}else {
-				if(preFlowElementList.stream().anyMatch(e-> (e instanceof StartEvent))) {
-					throw new FlowableException("Can not withdraw to the start event.");
-				}
-				processEngine.getRuntimeService().createChangeActivityStateBuilder()
-				.processInstanceId(	historicTaskInstance.getProcessInstanceId())
-				.moveSingleActivityIdToActivityIds(currentActivityIdList.get(0), preFlowElementList.stream().map(e->e.getId()).collect(Collectors.toList()))
-				.changeState();
-			}
-		}else {
-			if(preFlowElementList.size() == 1) {
-				FlowElement preFlowElement = preFlowElementList.get(0);
-
-//				开始节点不能回退
-				if(preFlowElement instanceof StartEvent){
-					throw new FlowableException("Can not withdraw to the start event.");
-				}
-				processEngine.getRuntimeService().createChangeActivityStateBuilder()
-				.processInstanceId(	historicTaskInstance.getProcessInstanceId())
-				.moveActivityIdsToSingleActivityId(currentActivityIdList, preFlowElement.getId())
-				.changeState();
-			}else {
-				if(preFlowElementList.stream().anyMatch(e-> (e instanceof StartEvent))) {
-					throw new FlowableException("Can not withdraw to the start event.");
-				}
-				//not support
-			}
+		if(CollectionUtils.isEmpty(currentActivityIdList) ) {
+			throw new FlowableException("Can not withdraw to the task.");
 		}
+		if(currentActivityIdList.size() > 1) {
+			processEngine.getRuntimeService().createChangeActivityStateBuilder()
+			.processInstanceId(	historicTaskInstance.getProcessInstanceId())
+			.moveActivityIdsToSingleActivityId(currentActivityIdList, historicActivityId)
+			.changeState();
+		}else {
+			processEngine.getRuntimeService().createChangeActivityStateBuilder()
+			.processInstanceId(	historicTaskInstance.getProcessInstanceId())
+			.moveActivityIdTo(currentActivityIdList.get(0), historicActivityId)
+			.changeState();
+		}
+		
 		return true;
 	}
 	
@@ -386,6 +410,7 @@ public class FlowableUtils {
 	 * 作    者:710009498
 	 * 时    间:Jan 11, 2019 8:42:58 AM
 	 */
+	@SuppressWarnings("unused")
 	private static void getInSequenceFlow(String activityId,BpmnModel bpmnModel,List<FlowElement> flowElementList){
 		FlowNode flowNode = (FlowNode) bpmnModel.getFlowElement(activityId);
        List<SequenceFlow> incomingFlows = flowNode.getIncomingFlows();

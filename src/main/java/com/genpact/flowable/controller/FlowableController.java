@@ -158,7 +158,7 @@ public class FlowableController {
 	@ResponseBody
 	public Result withdraw(@PathVariable("hisTaskId") String hisTaskId, FlowableModel model) {
 		model.setTaskId(hisTaskId);
-		FlowableUtils.taskWithdraw(processEngine, model);
+		FlowableUtils.taskWithdraw(model,processEngine);
         return Result.ok();
 	}
 
